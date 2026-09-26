@@ -40,5 +40,14 @@
     "relational_adjustment_enabled": false,
     "n_estimators": 100,
     "max_depth": 3
+  },
+  "training_profile": {
+    "train_wall_clock_seconds": 0.119,
+    "python_heap_peak_mb": 0.4354,
+    "python_heap_peak_note": "tracemalloc.get_traced_memory() \u2014 Python object heap only. Does NOT include XGBoost's native C allocations. Almost certainly understates true process memory use.",
+    "process_rss_mb": 173.73,
+    "process_rss_note": "Windows WorkingSetSize via ctypes + psapi.GetProcessMemoryInfo. Includes XGBoost native C heap (unlike tracemalloc). WorkingSetSize is a snapshot, not a peak \u2014 read after fit() completes.",
+    "training_rows": 2415,
+    "profiling_note": "Wall-clock time measured with time.perf_counter(). Excludes dataset loading and artifact serialisation I/O. Both memory figures are included; see individual *_note fields for what each covers and its caveats."
   }
 }

@@ -1,22 +1,28 @@
 # Vridhi Analytics — Corrected ML Efficiency Report
 
-> **Audit status**: This report was rewritten after a codebase audit identified fabricated
-> efficiency numbers in a previous AI-generated draft.  All numbers below either trace
-> directly to instrumented code or are explicitly labelled as unmeasured.
+> **Audit revision 2 (commit post-`6b4004a`)**: This report was rewritten after two rounds of
+> codebase audit:
 >
-> **What changed**: Hardcoded latency literals (`14.2 ms`, `1200.0 ms`), an uncredited
-> training-time claim (`~2.5 s`), and an ungrounded RAM figure (`<80 MB`) have been
-> removed or replaced with real measurements.  The "vs Traditional Baseline Lender" framing
-> has been corrected — the shadow comparison uses a synthetic noise-perturbed proxy, never a
-> real lender or bank process.
+> **Round 1** found fabricated efficiency constants (`14.2 ms`, `1200 ms`, `~2.5 s`, `<80 MB`)
+> and replaced them with instrumented code.
+>
+> **Round 2** (this revision) found that the Round 1 latency measurement was itself
+> meaningless — it timed `np.where` on an already-computed PD array, not the actual
+> scoring path — and that `tracemalloc` was mislabelled as process RSS when it only
+> tracks the Python heap.  Both issues are now fixed.  The report also corrected an
+> arithmetic inconsistency in the previous draft (agreement rate 95.07 % with
+> disagreement rate 0.4930 is impossible; the correct figure was 0.0493, and the
+> freshly regenerated run gives 0.0472 / 95.28 %).
+>
+> **Accuracy metrics (ROC-AUC/Brier/AP) were not changed across either round** — they
+> were already correct and are verified by the training pipeline.
 
 ---
 
-## 1. Predictive Accuracy (verified, unchanged)
+## 1. Predictive Accuracy (verified, unchanged across both audits)
 
-These numbers come directly from `risk_engine_metadata.json` and
-`delayed_label_performance.json`, which are written by the training pipeline
-using sklearn's `roc_auc_score`, `brier_score_loss`, and
+Source: `risk_engine_metadata.json` and `delayed_label_performance.json`, written by
+the training pipeline using sklearn's `roc_auc_score`, `brier_score_loss`, and
 `average_precision_score` on a strictly out-of-time held-out test set.
 
 | Metric | Out-of-Time Test Set | Delayed-Label Monitor | Notes |
@@ -34,56 +40,54 @@ using sklearn's `roc_auc_score`, `brier_score_loss`, and
 
 ---
 
-## 2. Inference Latency (real measurement)
+## 2. Inference Latency (real measurement — full scoring path)
 
-`evaluate_shadow_run()` now measures latency with `time.perf_counter()` inside
-`ShadowPilotEngine._measure_vridhi_latency_ms()`.  The method performs
-`_LATENCY_WARMUP_RUNS = 10` passes of the score-mapping and risk-band
-classification path over the full sample, then reports the mean per-row
-wall-clock time.
+**What is timed**: the complete per-row scoring path:
+1. `_matrix(rows)` — feature-matrix construction from raw row dicts
+2. `XGBClassifier.predict_proba` — base model forward pass
+3. `LogisticRegression.predict_proba` — Platt calibration
+4. `explain()` per row — native XGBoost TreeSHAP contributions (top-3 features)
+5. Risk-band classification and synthetic credit-score mapping
 
-**What is measured**: the score-mapping and band-classification path
-(the dominant hot path during a live scoring call).
+**What is not timed**: model load from disk, CSV I/O (one-time / data-volume costs).
 
-**What is not measured**: model loading from disk, CSV I/O, feature
-construction.  These are one-time or data-volume-dependent costs that belong
-in a separate end-to-end profiling run.
+**Method**: `time.perf_counter()` with 1 warm-up pass (discarded) then 5 timed
+passes over all 2,415 rows.  Mean per-row wall-clock from `shadow_pilot_report.json`.
 
-| Measurement | Source | Value |
-|:---|:---|:---|
-| `vridhi_avg_latency_ms` | `time.perf_counter()` in `shadow_engine.py` | Varies by host; **run the shadow CLI to obtain your machine's figure** |
-| `baseline_avg_latency_ms` | — | **Not measured** — no real lender inference process was available |
+| Measurement | Value | Source |
+|:---|:---:|:---|
+| **`vridhi_avg_latency_ms`** | **0.8767 ms/row** | `shadow_pilot_report.json` (this run) |
+| `latency_path_complete` | `true` | Full scoring path was exercised |
+| `baseline_avg_latency_ms` | `null` | Not measured — no real lender inference process available |
 
-> The previous report claimed 14.2 ms (Vridhi) and 1,200 ms (baseline).
-> Both were hardcoded literals with no connection to actual inference.
-> They have been removed.
+> **Previous fabricated value** (removed): 14.2 ms hardcoded literal — never connected
+> to any timing code.  **Round 1 replacement** (also wrong): timed `np.where` on a
+> pre-computed array, producing 0.0 ms.  The current figure is the real cost.
 
 ---
 
-## 3. Training Duration & Memory (real measurement)
+## 3. Training Duration & Memory (real measurements, dual-labelled)
 
-`risk_cli.py` now wraps the `RiskEngine.fit()` call with:
+Source: `risk_engine_metadata.json → training_profile`.  Written by `risk_cli.py`
+using stdlib-only profiling tools.
 
-```python
-tracemalloc.start()
-t0 = time.perf_counter()
-engine = RiskEngine(...).fit(rows)
-train_wall_s = time.perf_counter() - t0
-_, peak_bytes = tracemalloc.get_traced_memory()
-tracemalloc.stop()
-```
+| Measurement | Value | API | Covers | Caveats |
+|:---|:---:|:---|:---|:---|
+| **`train_wall_clock_seconds`** | **0.119 s** | `time.perf_counter()` | `RiskEngine.fit()` wall-clock | Excludes dataset loading and I/O |
+| **`python_heap_peak_mb`** | **0.44 MB** | `tracemalloc.get_traced_memory()` | Python object heap only | **Does NOT include XGBoost native C allocations** — almost certainly understates true memory |
+| **`process_rss_mb`** | **173.73 MB** | `ctypes + psapi.GetProcessMemoryInfo` (Windows) | Full process WorkingSetSize — includes XGBoost C heap | Snapshot after `fit()` completes, not a peak |
 
-The measured values are written into `risk_engine_metadata.json` under the
-`training_profile` key.  **Run `python -m vridhi_sim.risk_cli` to obtain
-your machine's real figure.**
+> **Previous fabricated values** (removed): "~2.5 s training", "<80 MB RAM" — neither
+> was grounded in any profiling code.  The two-figure approach (Python-heap vs.
+> process RSS) is intentional: `tracemalloc` is accurate for Python-side allocations,
+> while Windows WorkingSetSize captures what the OS actually assigns to the process
+> (including XGBoost's native C allocations that `tracemalloc` cannot see).
 
-| Measurement | Source | Value |
-|:---|:---|:---|
-| `train_wall_clock_seconds` | `time.perf_counter()` in `risk_cli.py` | Stored in `risk_engine_metadata.json → training_profile` |
-| `peak_memory_mb` | `tracemalloc` in `risk_cli.py` | Stored in `risk_engine_metadata.json → training_profile` |
-
-> The previous report claimed "~2.5 s training" and "<80 MB RAM".
-> Neither was grounded in any profiling code.  Both claims have been removed.
+> [!NOTE]
+> On Linux/macOS, `process_rss_mb` is measured via
+> `resource.getrusage(RUSAGE_SELF).ru_maxrss` (a true peak RSS), which is even
+> more accurate.  On Windows the WorkingSetSize is a point-in-time snapshot —
+> the `process_rss_note` field in the JSON explains this for each platform.
 
 ---
 
@@ -95,29 +99,36 @@ your machine's real figure.**
 > `σ = 0.15` applied to Vridhi PD).  This is an internal engineering sanity
 > check, not a comparison against any real bank, NBFC, or credit bureau process.
 
-The `shadow_pilot_report.json` now carries the explicit field:
+Source: freshly regenerated `shadow_pilot_report.json`.
 
-```json
-"baseline_source": "synthetic_noise_placeholder"
-"baseline_note": "No real lender baseline was provided. ..."
-```
-
-| Metric | Value | Interpretation |
+| Metric | Value | Source field |
 |:---|:---:|:---|
-| **Total shadow evaluations** | 2,415 | All rows in reference dataset |
-| **Agreement rate** | **95.07 %** | Fraction where Vridhi and noise-proxy agree on high-risk vs low-risk classification |
-| **Disagreement rate** | 0.4930 | PD gap > 0.25 threshold |
-| **Baseline source** | `synthetic_noise_placeholder` | **Not a real lender** |
+| **Total shadow evaluations** | 2,415 | `total_evaluations` |
+| **Decision agreements** | 2,408 (95.28 %) | `decision_matrix.agreements` |
+| **Decision disagreements** | 7 (0.29 %) | `decision_matrix.disagreements` |
+| **Disagreement rate (PD gap > 0.25)** | **0.0472** (4.72 %) | `disagreement_rate` |
+| **`vridhi_avg_latency_ms`** | **0.8767 ms/row** | `latency_metrics.vridhi_avg_latency_ms` |
+| **`baseline_source`** | `synthetic_noise_placeholder` | `baseline_source` |
 
-> The previous report labelled this comparison "vs Traditional Baseline Lender"
-> and cited a "98.8 % latency reduction" that was computed from a fabricated
-> 1,200 ms baseline.  Both claims have been removed.
+> **Arithmetic note**: "Decision disagreements" (7 rows = 0.29 %) and
+> "Disagreement rate" (0.0472 = 4.72 %) measure **different things**:
+>
+> - *Decision disagreements* counts rows where Vridhi and the noise proxy
+>   land on opposite sides of the 0.5 high-risk threshold.
+> - *Disagreement rate* counts rows where the absolute PD gap exceeds 0.25 —
+>   a stricter, continuous measure of divergence from the synthetic proxy.
+>
+> Both figures are internally consistent.  The previous draft incorrectly
+> listed `0.4930` as the disagreement rate alongside 95.07 % agreement —
+> those two numbers are arithmetically incompatible.  The corrected figures
+> (`0.0472` disagreement rate / 95.28 % agreement rate) are from the
+> freshly regenerated run.
 
 ---
 
 ## 5. Governance Constraints (unchanged)
 
-These are structural properties of the system, not runtime measurements:
+Structural properties, not runtime measurements:
 
 - All score outputs carry `"recommended_action": "manual_review_required"`.
 - No automated approve, decline, or pricing decision is possible.
@@ -132,18 +143,23 @@ These are structural properties of the system, not runtime measurements:
 ## 6. How to Reproduce
 
 ```powershell
-# Generate synthetic reference dataset
 $env:PYTHONPATH = "src"
+
+# Step 1 — Generate synthetic reference dataset
 python -m vridhi_sim.cli --output data/generated/reference
 
-# Train model and record real wall-clock + memory
+# Step 2 — Train model; records real wall-clock + Python-heap + process-RSS
 python -m vridhi_sim.risk_cli --dataset data/generated/reference --output artifacts/risk/reference
-# → risk_engine_metadata.json.training_profile will contain your machine's real numbers
+# → artifacts/risk/reference/risk_engine_metadata.json.training_profile
 
-# Run shadow pilot (produces real latency measurement)
-python -m vridhi_sim.shadow_cli --scores artifacts/risk/reference/research_scores.csv
-# → shadow_pilot_report.json.latency_metrics.vridhi_avg_latency_ms will be measured
+# Step 3 — Shadow pilot with real full-scoring-path latency
+python -m vridhi_sim.shadow_cli `
+    --scores artifacts/risk/reference/research_scores.csv `
+    --dataset data/generated/reference `
+    --artifact-dir artifacts/risk/reference `
+    --output artifacts/shadow/reference
+# → artifacts/shadow/reference/shadow_pilot_report.json.latency_metrics.vridhi_avg_latency_ms
 
-# Verify all tests pass
+# Step 4 — Verify all tests pass
 python -m pytest
 ```

@@ -25,6 +25,21 @@ def _make_labels(outcomes: list[int]) -> pd.DataFrame:
     return pd.DataFrame({"repayment_status_30dpd": outcomes})
 
 
+def _build_minimal_engine():
+    """Build and return a trained RiskEngine on a minimal synthetic dataset.
+
+    Kept separate so tests that don't need a real engine remain fast.
+    """
+    from vridhi_sim.risk_engine import RiskEngine, RiskEngineConfig, build_learning_dataset
+    from pathlib import Path
+
+    dataset_dir = Path("data/generated/reference")
+    if not dataset_dir.exists():
+        pytest.skip("Reference dataset not generated; run vridhi-simulate first.")
+    rows = build_learning_dataset(dataset_dir)
+    return RiskEngine(RiskEngineConfig()).fit(rows), rows
+
+
 # ---------------------------------------------------------------------------
 # Core evaluation tests
 # ---------------------------------------------------------------------------
@@ -78,45 +93,77 @@ def test_shadow_engine_synthetic_baseline_is_explicitly_labelled() -> None:
     )
 
 
-def test_latency_is_measured_not_hardcoded() -> None:
-    """vridhi_avg_latency_ms must be a real measurement, not the old hardcoded 14.2.
+def test_latency_is_null_when_no_engine_provided() -> None:
+    """When no risk_engine is passed, vridhi_avg_latency_ms must be null (not 0.0 or 14.2).
 
-    The measured value will differ across machines and run sizes, so we only
-    assert structural correctness (positive float) and that it is NOT the exact
-    old fabricated constant.
+    The previous implementation timed np.where on an already-computed PD array
+    which is not the scoring path.  Without a real engine the latency must be
+    explicitly reported as None rather than silently returning a meaningless 0.0.
     """
-    # Use a larger sample so the measurement is non-trivially fast
     risk_pds = [0.1 * (i % 10) for i in range(200)]
     scores_data = _make_scores(risk_pds)
 
     engine = ShadowPilotEngine()
-    report = engine.evaluate_shadow_run(scores_data)
+    report = engine.evaluate_shadow_run(scores_data)  # no risk_engine
 
     latency = report["latency_metrics"]["vridhi_avg_latency_ms"]
-
-    assert isinstance(latency, float), "latency must be a float, not None or a string"
-    assert latency > 0, "measured latency must be strictly positive"
-    assert latency != 14.2, (
-        "latency must be a real measurement, not the old hardcoded constant 14.2. "
-        f"Got {latency}"
+    assert latency is None, (
+        "vridhi_avg_latency_ms must be null when risk_engine is not provided; "
+        f"got {latency!r}.  Do not time post-processing on a pre-computed array."
     )
-    # Baseline latency must be None because no real lender process exists
-    assert report["latency_metrics"]["baseline_avg_latency_ms"] is None, (
-        "baseline_avg_latency_ms must be None when no real lender timing is available"
+    assert report["latency_metrics"]["latency_path_complete"] is False
+    # The note must explain why latency is null
+    method_note = report["latency_metrics"]["latency_measurement_method"]
+    assert "risk_engine" in method_note.lower() or "not provided" in method_note.lower(), (
+        "latency_measurement_method must explain that risk_engine was not available"
+    )
+    # Baseline latency still null
+    assert report["latency_metrics"]["baseline_avg_latency_ms"] is None
+
+
+def test_latency_is_real_and_nonzero_when_engine_provided() -> None:
+    """When a real RiskEngine is provided, latency must cover the full scoring path
+    (XGBoost predict_proba + Platt calibration + TreeSHAP) and produce a
+    strictly positive, non-fabricated value.
+    """
+    risk_engine, rows = _build_minimal_engine()
+
+    # Build scores_df from the real engine output
+    score_records = risk_engine.score(rows)
+    scores_df = pd.DataFrame([{"farmer_id": r["farmer_id"], "risk_pd": r["risk_pd"]} for r in score_records])
+
+    pilot = ShadowPilotEngine()
+    report = pilot.evaluate_shadow_run(
+        scores_df,
+        risk_engine=risk_engine,
+        sample_rows=rows,
+    )
+
+    latency = report["latency_metrics"]["vridhi_avg_latency_ms"]
+    assert isinstance(latency, float), f"latency must be a float, got {type(latency)}"
+    assert latency > 0, f"measured latency must be strictly positive, got {latency}"
+    assert latency != 14.2, "latency must NOT be the old hardcoded constant 14.2"
+    assert report["latency_metrics"]["latency_path_complete"] is True
+
+    method = report["latency_metrics"]["latency_measurement_method"]
+    assert "perf_counter" in method.lower(), "method must reference time.perf_counter()"
+    # Confirm it covers the full path, not just post-processing
+    assert "xgb" in method.lower() or "predict_proba" in method.lower(), (
+        "method description must confirm XGBoost/calibration was included in the timed path"
     )
 
 
 def test_latency_measurement_method_is_documented() -> None:
-    """The latency_metrics block must include a human-readable explanation of how latency was measured."""
+    """The latency_metrics block must always include a latency_measurement_method string."""
     scores_data = _make_scores([0.2, 0.5, 0.8])
     engine = ShadowPilotEngine()
     report = engine.evaluate_shadow_run(scores_data)
 
     assert "latency_measurement_method" in report["latency_metrics"], (
-        "latency_metrics must document how latency was measured"
+        "latency_metrics must document how (or why not) latency was measured"
     )
     method = report["latency_metrics"]["latency_measurement_method"]
-    assert "perf_counter" in method.lower(), "method description must reference time.perf_counter()"
+    assert isinstance(method, str) and len(method) > 10
 
 
 def test_no_data_returns_early() -> None:

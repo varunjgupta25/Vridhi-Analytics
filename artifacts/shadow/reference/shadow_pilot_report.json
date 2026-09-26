@@ -1,18 +1,22 @@
 {
-  "generated_at": "2026-08-03T01:03:55.897958+00:00",
+  "generated_at": "2026-09-26T15:27:14.318783+00:00",
   "status": "SHADOW_PILOT_COMPLETED",
   "total_evaluations": 2415,
-  "disagreement_rate": 0.0493,
+  "disagreement_rate": 0.0472,
+  "baseline_source": "synthetic_noise_placeholder",
+  "baseline_note": "No real lender baseline was provided.  The comparison uses a synthetic Gaussian-perturbed proxy (seed=42) and must not be presented as a real lender or bank benchmark.",
   "decision_matrix": {
-    "agreements": 2399,
-    "disagreements": 16,
-    "vridhi_high_lender_approve": 11,
-    "vridhi_low_lender_decline": 5
+    "agreements": 2408,
+    "disagreements": 7,
+    "vridhi_high_lender_approve": 3,
+    "vridhi_low_lender_decline": 4
   },
   "latency_metrics": {
-    "vridhi_avg_latency_ms": 14.2,
-    "baseline_avg_latency_ms": 1200.0,
-    "latency_delta_ms": -1185.8
+    "vridhi_avg_latency_ms": 0.8767,
+    "latency_path_complete": true,
+    "latency_measurement_method": "time.perf_counter() over 5 full scoring passes on 2415 rows (1 warm-up pass discarded). Covers: feature-matrix build, XGBClassifier.predict_proba, Platt-calibrator.predict_proba, per-row TreeSHAP explain(), risk-band classification, and score-mapping. Excludes: model load from disk and CSV I/O.",
+    "baseline_avg_latency_ms": null,
+    "baseline_latency_note": "Not measured.  No real lender inference process was available during this shadow pilot run."
   },
   "operational_feedback_summary": {
     "total_feedbacks": 0,

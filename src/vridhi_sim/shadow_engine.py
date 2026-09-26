@@ -11,7 +11,7 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Sequence
+from typing import TYPE_CHECKING, Any, Sequence
 
 import numpy as np
 import pandas as pd
@@ -19,9 +19,12 @@ from sklearn.metrics import brier_score_loss, roc_auc_score
 
 from .mlops import write_json
 
+if TYPE_CHECKING:
+    from .risk_engine import RiskEngine
+
 # Number of repeated scoring passes used to estimate inference latency.
-# Using 10 passes averages out OS scheduling jitter while remaining fast.
-_LATENCY_WARMUP_RUNS = 10
+# A higher value averages out OS scheduling jitter; 5 is enough for warm XGBoost.
+_LATENCY_WARMUP_RUNS = 5
 
 
 @dataclass
@@ -56,36 +59,78 @@ class ShadowPilotEngine:
         self.feedback_records.append(feedback)
 
     @staticmethod
-    def _measure_vridhi_latency_ms(vridhi_pd: np.ndarray) -> float:
-        """Measure real per-row inference latency using time.perf_counter().
+    def _measure_real_scoring_latency_ms(
+        risk_engine: "RiskEngine",
+        sample_rows: list[dict[str, Any]],
+    ) -> tuple[float, str]:
+        """Measure per-row wall-clock latency of the full Vridhi scoring path.
 
-        We perform _LATENCY_WARMUP_RUNS passes over the already-computed PD
-        array (simulating the scoring read path) to produce a stable wall-clock
-        estimate. This avoids counting one-time import/JIT overhead.
+        The full path includes:
+          feature-matrix construction (_matrix) →
+          XGBClassifier.predict_proba (base model) →
+          LogisticRegression.predict_proba (Platt calibration) →
+          per-row TreeSHAP explain() →
+          risk-band classification and score-mapping
+
+        This is what an actual live scoring call costs, not post-processing
+        on an already-computed PD array.
+
+        Returns
+        -------
+        avg_per_row_ms : float
+            Mean per-row wall-clock time in milliseconds, averaged over
+            _LATENCY_WARMUP_RUNS repeat passes.
+        method_note : str
+            Human-readable description of exactly what was timed.
         """
-        n = max(len(vridhi_pd), 1)
+        n = max(len(sample_rows), 1)
+        # One warm-up pass (discarded) to allow XGBoost's internal caches to settle.
+        risk_engine.score(sample_rows)
         start = time.perf_counter()
         for _ in range(_LATENCY_WARMUP_RUNS):
-            # Simulate the per-row risk-band classification and score-mapping
-            # that happens during a real scoring call (no sklearn I/O overhead).
-            _ = np.where(vridhi_pd < 0.15, "low", np.where(vridhi_pd < 0.35, "moderate", "high"))
-            _ = (300 + 600 * (1.0 - vridhi_pd)).astype(int)
+            risk_engine.score(sample_rows)
         elapsed_s = time.perf_counter() - start
         avg_per_row_ms = (elapsed_s / (_LATENCY_WARMUP_RUNS * n)) * 1000.0
-        return round(avg_per_row_ms, 4)
+        method_note = (
+            f"time.perf_counter() over {_LATENCY_WARMUP_RUNS} full scoring passes "
+            f"on {n} rows (1 warm-up pass discarded). "
+            "Covers: feature-matrix build, XGBClassifier.predict_proba, "
+            "Platt-calibrator.predict_proba, per-row TreeSHAP explain(), "
+            "risk-band classification, and score-mapping. "
+            "Excludes: model load from disk and CSV I/O."
+        )
+        return round(avg_per_row_ms, 4), method_note
 
     def evaluate_shadow_run(
         self,
         scores_df: pd.DataFrame,
         labels_df: pd.DataFrame | None = None,
         lender_baseline_pd: Sequence[float] | None = None,
+        risk_engine: "RiskEngine | None" = None,
+        sample_rows: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
         """Compare Vridhi PD against baseline lender decisions or scores.
 
-        When ``lender_baseline_pd`` is None, a synthetic noise-perturbed
-        baseline is generated for internal pilot tracking.  The report will
-        always include a ``baseline_source`` field so downstream consumers
-        cannot mistake a synthetic proxy for a real lender comparison.
+        Parameters
+        ----------
+        scores_df:
+            DataFrame containing ``risk_pd`` column — the already-computed
+            Vridhi PD scores for each row.
+        labels_df:
+            Optional DataFrame with ``repayment_status_30dpd`` column for
+            computing performance divergence against ground truth.
+        lender_baseline_pd:
+            Actual lender PD scores for comparison.  When None, a synthetic
+            noise-perturbed proxy is used and the report is labelled accordingly.
+        risk_engine:
+            A trained ``RiskEngine`` instance.  When provided together with
+            ``sample_rows``, latency is measured over the **full scoring path**
+            (feature build → XGBoost → calibration → TreeSHAP → band/score map).
+            When None, latency is reported as null — the scoring path is not
+            available in this evaluation context.
+        sample_rows:
+            The raw feature rows corresponding to ``scores_df``.  Required when
+            ``risk_engine`` is provided.
         """
         n_samples = len(scores_df)
         if n_samples == 0:
@@ -119,8 +164,20 @@ class ShadowPilotEngine:
         agreements = int(np.sum(vridhi_high_risk == baseline_declined))
         disagreements = int(n_samples - agreements)
 
-        # --- Real latency measurement ----------------------------------------
-        vridhi_avg_latency_ms = self._measure_vridhi_latency_ms(vridhi_pd)
+        # --- Real scoring-path latency measurement ---------------------------
+        if risk_engine is not None and sample_rows is not None:
+            vridhi_avg_latency_ms, method_note = self._measure_real_scoring_latency_ms(
+                risk_engine, sample_rows
+            )
+            latency_available = True
+        else:
+            vridhi_avg_latency_ms = None
+            method_note = (
+                "risk_engine was not provided to evaluate_shadow_run(); "
+                "real scoring-path latency cannot be measured from a pre-computed "
+                "PD array.  Pass risk_engine + sample_rows to obtain a real figure."
+            )
+            latency_available = False
 
         report: dict[str, Any] = {
             "generated_at": datetime.now(UTC).isoformat(),
@@ -137,13 +194,9 @@ class ShadowPilotEngine:
             },
             "latency_metrics": {
                 "vridhi_avg_latency_ms": vridhi_avg_latency_ms,
-                "latency_measurement_method": (
-                    f"time.perf_counter() averaged over {_LATENCY_WARMUP_RUNS} passes "
-                    f"across {n_samples} rows; measures score-mapping + band-classification "
-                    "path only — excludes model load and CSV I/O."
-                ),
-                # Baseline latency is not measured here because no real baseline
-                # inference process is available.  Do not fabricate a number.
+                "latency_path_complete": latency_available,
+                "latency_measurement_method": method_note,
+                # Baseline latency is not measured — no real lender inference process available.
                 "baseline_avg_latency_ms": None,
                 "baseline_latency_note": (
                     "Not measured.  No real lender inference process was available "
