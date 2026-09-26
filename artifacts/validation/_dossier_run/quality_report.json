@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-08-23T02:11:04.936333+00:00",
+  "dataset_dir": "data\\generated\\_dossier_run",
+  "declared_data_classification": "synthetic",
+  "admission_scope": "synthetic_research_only",
+  "overall_status": "PASS",
+  "tables": {
+    "nodes.csv": {
+      "rows": 124,
+      "columns": [
+        "entity_id",
+        "entity_type",
+        "pincode",
+        "synthetic",
+        "crop",
+        "irrigation_resilience",
+        "land_hectares"
+      ]
+    },
+    "edges.csv": {
+      "rows": 6080,
+      "columns": [
+        "event_id",
+        "timestamp",
+        "source_id",
+        "target_id",
+        "amount_inr",
+        "transaction_type",
+        "channel",
+        "pincode",
+        "drought_severity",
+        "synthetic"
+      ]
+    },
+    "node_month.csv": {
+      "rows": 2976,
+      "columns": [
+        "month",
+        "entity_id",
+        "entity_type",
+        "pincode",
+        "cash_balance",
+        "income_inr",
+        "expense_inr",
+        "net_cash_flow_inr",
+        "income_volatility_3m",
+        "missed_utility_payments",
+        "overdue_installments",
+        "drought_severity",
+        "repayment_ability_proxy",
+        "synthetic"
+      ]
+    },
+    "borrower_month_labels.csv": {
+      "rows": 2520,
+      "columns": [
+        "month",
+        "farmer_id",
+        "pincode",
+        "synthetic_30dpd",
+        "synthetic_60dpd",
+        "repayment_ability_proxy",
+        "drought_severity",
+        "label_origin"
+      ]
+    }
+  },
+  "temporal_alignment": {
+    "feature_time": "month_t",
+    "outcome_time": "month_t_plus_1",
+    "eligible_farmer_month_pairs": 2415,
+    "missing_feature_snapshots": 0,
+    "non_consecutive_label_pairs": 0,
+    "status": "PASS"
+  },
+  "issues": []
+}

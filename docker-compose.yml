@@ -1,0 +1,38 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      VRIDHI_RISK_MODEL_DIR: /app/artifacts/risk/reference
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      # Replace the demo values with generated Fernet keys outside local development.
+      VRIDHI_SANDBOX_CLIENT_ID: sandbox-client
+      VRIDHI_SANDBOX_CLIENT_SECRET: sandbox-secret
+    depends_on:
+      redis:
+        condition: service_healthy
+      mlflow:
+        condition: service_started
+  mlflow:
+    build: .
+    command: ["mlflow", "server", "--host", "0.0.0.0", "--port", "5000", "--backend-store-uri", "sqlite:////mlflow/mlflow.db", "--artifacts-destination", "/mlflow/artifacts", "--serve-artifacts"]
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow-data:/mlflow
+  redis:
+    image: redis:8-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:
+  mlflow-data:

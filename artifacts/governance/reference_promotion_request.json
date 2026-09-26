@@ -1,0 +1,8 @@
+{
+  "candidate_dir": "artifacts\\risk\\reference",
+  "requested_by": "model-risk-owner",
+  "requested_at": "2026-07-27T07:25:16.126792+00:00",
+  "status": "PENDING_HUMAN_MODEL_RISK_APPROVAL",
+  "drift_status": "NOT_SUPPLIED",
+  "automatic_promotion": false
+}

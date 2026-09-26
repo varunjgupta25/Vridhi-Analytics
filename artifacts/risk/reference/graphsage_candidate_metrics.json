@@ -1,0 +1,10 @@
+{
+  "metrics": {
+    "candidate_only": true,
+    "test_rows": 525,
+    "test_brier": 0.2761,
+    "test_roc_auc": 0.5269,
+    "test_average_precision": 0.5396
+  },
+  "deployment_status": "validation_gated_not_used_for_scoring"
+}

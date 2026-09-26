@@ -1,0 +1,9 @@
+{
+  "evaluated_rows": 2415,
+  "outcome_rate": 0.18882,
+  "brier": 0.030124,
+  "roc_auc": 0.99401,
+  "average_precision": 0.970775,
+  "status": "REVIEW_REQUIRED",
+  "note": "Performance is measured only after delayed outcomes arrive; no automatic retraining is performed."
+}

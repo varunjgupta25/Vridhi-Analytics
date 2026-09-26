@@ -1,0 +1,44 @@
+{
+  "synthetic_research_only": true,
+  "feature_columns": [
+    "cash_balance",
+    "income_inr",
+    "expense_inr",
+    "net_cash_flow_inr",
+    "income_volatility_3m",
+    "missed_utility_payments",
+    "overdue_installments",
+    "drought_severity",
+    "repayment_ability_proxy",
+    "buyer_network_stress",
+    "buyer_network_coverage"
+  ],
+  "metrics": {
+    "training_rows": 1365,
+    "calibration_rows": 525,
+    "test_rows": 525,
+    "test_default_rate": 0.4133,
+    "test_brier": 0.0746,
+    "test_roc_auc": 0.9893,
+    "test_average_precision": 0.984
+  },
+  "training_cutoffs": {
+    "train_through": "2026-01-01",
+    "calibration_through": "2026-06-01",
+    "test_from": "2026-07-01"
+  },
+  "explanations": "Native XGBoost TreeSHAP feature contributions for the tabular model only.",
+  "relational_layer": {
+    "type": "past_only_interpretable_buyer_network_feature",
+    "default_enabled": false,
+    "maximum_probability_delta": 0.03,
+    "warning": "Not a validated GNN and not authorised for autonomous credit decisions."
+  },
+  "model_configuration": {
+    "random_state": 42,
+    "max_relational_delta": 0.03,
+    "relational_adjustment_enabled": false,
+    "n_estimators": 100,
+    "max_depth": 3
+  }
+}

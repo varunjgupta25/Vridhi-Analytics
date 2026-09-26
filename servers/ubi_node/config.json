@@ -1,0 +1,18 @@
+{
+  "bank_code": "UBIN",
+  "bank_name": "Union Bank of India",
+  "node_id": "ubi-risk-node-06",
+  "port": 8006,
+  "data_file": "servers/ubi_node/ubi_applications.csv",
+  "officer_roles": [
+    "OFFICER-789",
+    "UBIN-OFFICER-101",
+    "UBIN-UNDERWRITER-01"
+  ],
+  "branch_pin": "413006",
+  "risk_policy": {
+    "max_risk_pd": 0.25,
+    "min_credit_score": 600,
+    "agri_bonus_pct": 0.05
+  }
+}

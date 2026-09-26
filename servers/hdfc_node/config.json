@@ -1,0 +1,18 @@
+{
+  "bank_code": "HDFC",
+  "bank_name": "HDFC Rural Bank",
+  "node_id": "hdfc-risk-node-10",
+  "port": 8010,
+  "data_file": "servers/hdfc_node/hdfc_applications.csv",
+  "officer_roles": [
+    "OFFICER-789",
+    "HDFC-OFFICER-101",
+    "HDFC-UNDERWRITER-01"
+  ],
+  "branch_pin": "413010",
+  "risk_policy": {
+    "max_risk_pd": 0.25,
+    "min_credit_score": 600,
+    "agri_bonus_pct": 0.05
+  }
+}

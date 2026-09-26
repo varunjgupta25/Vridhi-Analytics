@@ -1,0 +1,20 @@
+{
+  "contract_version": "1.0.0",
+  "partner_organization": "Regulated Rural NBFC Partner",
+  "license_id": "RBI_NBFC_REG_2026_MOCK",
+  "rollout_policy": {
+    "stages": {
+      "STAGE_0": { "name": "SHADOW_ONLY", "max_volume_pct": 0, "automated_decision": false },
+      "STAGE_1": { "name": "LIMITED_PILOT_5PCT", "max_volume_pct": 5, "automated_decision": false },
+      "STAGE_2": { "name": "EXPANDED_PILOT_25PCT", "max_volume_pct": 25, "automated_decision": false },
+      "STAGE_3": { "name": "CONTROLLED_PRODUCTION", "max_volume_pct": 100, "automated_decision": false }
+    },
+    "approved_pincodes": [413001, 413002, 413003, 413004, 413005],
+    "always_require_human_underwriter": true
+  },
+  "rollback_triggers": {
+    "max_acceptable_brier_score": 0.15,
+    "max_acceptable_psi_drift": 0.25,
+    "max_error_rate_pct": 1.0
+  }
+}

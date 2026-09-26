@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0",
+  "synthetic_only": true,
+  "seed": 42,
+  "months": 24,
+  "agents": 124,
+  "upi_edges": 6080,
+  "farmer_month_labels": 2520,
+  "drought_observations": 0,
+  "farmers_with_any_synthetic_30dpd": 50,
+  "configuration": {
+    "start_year": 2025,
+    "months": 24,
+    "farmers_per_region": 35,
+    "retailers_per_region": 4,
+    "wholesalers_per_region": 1,
+    "seed": 42,
+    "digital_share": 0.66,
+    "monthly_loan_installment": 1350.0,
+    "output_dir": "data\\generated\\reference",
+    "regions": [
+      {
+        "pincode": "413001",
+        "district": "Solapur",
+        "primary_crop": "soybean",
+        "crop_sale_months": [
+          3,
+          4,
+          10,
+          11
+        ],
+        "baseline_crop_income": 22000.0
+      },
+      {
+        "pincode": "431001",
+        "district": "Chhatrapati Sambhajinagar",
+        "primary_crop": "cotton",
+        "crop_sale_months": [
+          3,
+          4,
+          10,
+          11
+        ],
+        "baseline_crop_income": 22000.0
+      },
+      {
+        "pincode": "440001",
+        "district": "Nagpur",
+        "primary_crop": "paddy",
+        "crop_sale_months": [
+          3,
+          4,
+          10,
+          11
+        ],
+        "baseline_crop_income": 22000.0
+      }
+    ]
+  },
+  "limitations": [
+    "Synthetic repayment labels are simulation rules, not observed credit outcomes.",
+    "UPI edges are an observed subset; other simulated payments may be cash.",
+    "Climate input requires provenance and spatial validation before production use."
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "policy_id": "vridhi-synthetic-manual-review",
+  "version": "1.0.0",
+  "scope": "Synthetic research and demonstration only",
+  "automatic_approval": false,
+  "automatic_decline": false,
+  "group_specific_thresholds": false,
+  "review_priorities": {
+    "priority": {"risk_pd_gte": 0.5},
+    "elevated": {"risk_pd_gte": 0.25},
+    "standard": {"risk_pd_lt": 0.25}
+  },
+  "human_reviewer_must_confirm": [
+    "The data is accurate, current, and covered by the intended consent or approved basis.",
+    "The applicant receives an understandable explanation and a way to correct data.",
+    "Contextual signals are not used as sole reasons for an adverse outcome.",
+    "Any final lending decision follows the regulated lender's approved policy."
+  ],
+  "never_use_as_sole_adverse_reason": [
+    "pincode or geography",
+    "language",
+    "drought or climate context",
+    "digital-payment coverage or absence of UPI activity",
+    "buyer-network coverage or relationship graph"
+  ]
+}

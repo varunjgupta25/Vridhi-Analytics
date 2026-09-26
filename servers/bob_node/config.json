@@ -1,0 +1,18 @@
+{
+  "bank_code": "BARB",
+  "bank_name": "Bank of Baroda",
+  "node_id": "bob-risk-node-04",
+  "port": 8004,
+  "data_file": "servers/bob_node/bob_applications.csv",
+  "officer_roles": [
+    "OFFICER-789",
+    "BARB-OFFICER-101",
+    "BARB-UNDERWRITER-01"
+  ],
+  "branch_pin": "413004",
+  "risk_policy": {
+    "max_risk_pd": 0.25,
+    "min_credit_score": 600,
+    "agri_bonus_pct": 0.05
+  }
+}

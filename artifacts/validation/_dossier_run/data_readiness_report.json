@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-08-23T02:11:04.940216+00:00",
+  "current_dataset_classification": "synthetic",
+  "data_quality_status": "PASS",
+  "decision": "SYNTHETIC_RESEARCH_ONLY",
+  "real_borrower_scoring_allowed": false,
+  "automatic_underwriting_allowed": false,
+  "reason": "The dataset passed synthetic-data checks but has simulation labels and no consented real-world outcomes.",
+  "required_before_any_real_data_admission": [
+    "A partner-approved, field-level contract: source owner, permitted purpose, retention, deletion, and access roles.",
+    "A purpose-limited consent or other approved legal basis, plus revocation and audit handling.",
+    "Source provenance, completeness, reconciliation, and transaction-coverage testing.",
+    "Independently observed delayed outcomes and point-in-time validation on a held-out time period.",
+    "Privacy, security, fairness, human-oversight, and model-risk approval before a controlled pilot."
+  ],
+  "next_gate": "Phase 7 policy, fairness, and adverse-action controls; no partner data should be ingested yet."
+}

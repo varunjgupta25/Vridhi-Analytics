@@ -1,0 +1,19 @@
+{
+  "certificate_id": "GOV-CERT-2026-20260823021244",
+  "generated_at": "2026-08-23T02:12:44.620511+00:00",
+  "regulated_partner": "Regulated Rural NBFC Partner",
+  "license_id": "RBI_NBFC_REG_2026_MOCK",
+  "active_rollout_stage": "STAGE_1_LIMITED_PILOT_5PCT",
+  "system_health": "OPERATIONAL",
+  "rollout_safeguards": {
+    "always_require_human_underwriter": true,
+    "automated_loans_permitted": false,
+    "kill_switch_integrated": true
+  },
+  "gate_assessments": {
+    "data_admission_gate": null,
+    "security_gate": "VALID",
+    "shadow_pilot_gate": "SHADOW_PILOT_COMPLETED"
+  },
+  "approval_status": "APPROVED_FOR_CONTROLLED_PILOT_ONLY"
+}

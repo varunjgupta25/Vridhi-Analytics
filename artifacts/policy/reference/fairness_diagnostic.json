@@ -1,0 +1,52 @@
+{
+  "generated_at": "2026-07-31T05:13:30.734512+00:00",
+  "scope": "synthetic research diagnostic only",
+  "fairness_claim": "NOT_ESTABLISHED: scenario PIN-code cohorts are not protected-class labels and synthetic outcomes cannot validate real-world fairness.",
+  "group_definition": "pincode scenario partition",
+  "policy_thresholds_group_specific": false,
+  "final_lending_decision_counts": {
+    "NOT_MADE": 2415
+  },
+  "overall": {
+    "records": 2415,
+    "mean_risk_pd": 0.18481,
+    "manual_review_rate": 1.0,
+    "priority_review_rate": 0.192547,
+    "synthetic_outcome_rate": 0.18882
+  },
+  "cohorts": {
+    "413001": {
+      "records": 805,
+      "mean_risk_pd": 0.22533,
+      "manual_review_rate": 1.0,
+      "priority_review_rate": 0.24472,
+      "synthetic_outcome_rate": 0.236025,
+      "manual_review_rate_ratio_to_overall": 1.0,
+      "priority_review_rate_ratio_to_overall": 1.270962,
+      "coverage_status": "SUFFICIENT_FOR_DIAGNOSTIC"
+    },
+    "431001": {
+      "records": 805,
+      "mean_risk_pd": 0.185209,
+      "manual_review_rate": 1.0,
+      "priority_review_rate": 0.191304,
+      "synthetic_outcome_rate": 0.18882,
+      "manual_review_rate_ratio_to_overall": 1.0,
+      "priority_review_rate_ratio_to_overall": 0.993544,
+      "coverage_status": "SUFFICIENT_FOR_DIAGNOSTIC"
+    },
+    "440001": {
+      "records": 805,
+      "mean_risk_pd": 0.143891,
+      "manual_review_rate": 1.0,
+      "priority_review_rate": 0.141615,
+      "synthetic_outcome_rate": 0.141615,
+      "manual_review_rate_ratio_to_overall": 1.0,
+      "priority_review_rate_ratio_to_overall": 0.735483,
+      "coverage_status": "SUFFICIENT_FOR_DIAGNOSTIC"
+    }
+  },
+  "alerts": [],
+  "overall_status": "REVIEW_REQUIRED",
+  "automatic_action": "DISABLED"
+}

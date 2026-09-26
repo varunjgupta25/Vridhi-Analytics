@@ -1,0 +1,28 @@
+{
+  "contract_version": "1.0.0",
+  "purpose_code": "CREDIT_ASSESSMENT",
+  "aa_specification": {
+    "consent_type": "TRANSACTION_AND_SUMMARY",
+    "fetch_type": "ONETIME",
+    "supported_data_types": [
+      "DEPOSIT_TRANSACTION",
+      "UPI_STATEMENT",
+      "SUMMARY"
+    ],
+    "max_consent_duration_days": 30,
+    "encryption": {
+      "algorithm": "Fernet/AES-256-GCM",
+      "envelope": "REQUIRED"
+    }
+  },
+  "fiu_boundary": {
+    "identity_masking": "SHA256_SALTED_HASH",
+    "direct_pii_handling": "NEVER_STORED_IN_MODEL_LAYER",
+    "aml_sanction_check": "REQUIRED_BEFORE_INGESTION"
+  },
+  "bhashini_boundary": {
+    "supported_languages": ["en", "hi", "mr"],
+    "fallback_language": "en",
+    "mock_mode": true
+  }
+}

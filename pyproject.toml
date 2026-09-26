@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vridhi-simulator"
+version = "0.1.0"
+description = "Causal agent-based simulator for a synthetic rural Indian micro-economy"
+requires-python = ">=3.11"
+dependencies = [
+  "scikit-learn>=1.8",
+  "xgboost>=3.3",
+  "fastapi>=0.128",
+  "uvicorn>=0.40",
+  "cryptography>=46",
+  "redis>=8.0",
+  "mlflow>=3.14",
+]
+
+[project.scripts]
+vridhi-simulate = "vridhi_sim.cli:main"
+vridhi-train-risk = "vridhi_sim.risk_cli:main"
+vridhi-api = "vridhi_sim.api_cli:main"
+vridhi-monitor = "vridhi_sim.mlops_cli:main"
+vridhi-validate-data = "vridhi_sim.data_readiness_cli:main"
+vridhi-policy-check = "vridhi_sim.policy_cli:main"
+vridhi-security-check = "vridhi_sim.security_cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

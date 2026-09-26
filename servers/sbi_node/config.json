@@ -1,0 +1,18 @@
+{
+  "bank_code": "SBIN",
+  "bank_name": "State Bank of India",
+  "node_id": "sbi-risk-node-01",
+  "port": 8001,
+  "data_file": "servers/sbi_node/sbi_applications.csv",
+  "officer_roles": [
+    "OFFICER-789",
+    "SBIN-OFFICER-101",
+    "SBIN-UNDERWRITER-01"
+  ],
+  "branch_pin": "413001",
+  "risk_policy": {
+    "max_risk_pd": 0.25,
+    "min_credit_score": 600,
+    "agri_bonus_pct": 0.05
+  }
+}

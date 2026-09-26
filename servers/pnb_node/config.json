@@ -1,0 +1,18 @@
+{
+  "bank_code": "PUNB",
+  "bank_name": "Punjab National Bank",
+  "node_id": "pnb-risk-node-05",
+  "port": 8005,
+  "data_file": "servers/pnb_node/pnb_applications.csv",
+  "officer_roles": [
+    "OFFICER-789",
+    "PUNB-OFFICER-101",
+    "PUNB-UNDERWRITER-01"
+  ],
+  "branch_pin": "413005",
+  "risk_policy": {
+    "max_risk_pd": 0.25,
+    "min_credit_score": 600,
+    "agri_bonus_pct": 0.05
+  }
+}

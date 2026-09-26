@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "shadow_mode_enabled": true,
+  "disagreement_threshold_pd": 0.25,
+  "min_sample_size": 10,
+  "comparison_metrics": [
+    "disagreement_rate",
+    "brier_score_diff",
+    "auc_roc_diff",
+    "latency_delta_ms"
+  ],
+  "operational_feedback": {
+    "collect_officer_ratings": true,
+    "rating_scale": "1_TO_5"
+  }
+}

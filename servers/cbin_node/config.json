@@ -1,0 +1,18 @@
+{
+  "bank_code": "CBIN",
+  "bank_name": "Central Bank of India",
+  "node_id": "cbin-risk-node-03",
+  "port": 8003,
+  "data_file": "servers/cbin_node/cbin_applications.csv",
+  "officer_roles": [
+    "OFFICER-789",
+    "CBIN-OFFICER-101",
+    "CBIN-UNDERWRITER-01"
+  ],
+  "branch_pin": "413003",
+  "risk_policy": {
+    "max_risk_pd": 0.25,
+    "min_credit_score": 600,
+    "agri_bonus_pct": 0.05
+  }
+}

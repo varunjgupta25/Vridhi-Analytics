@@ -1,0 +1,18 @@
+{
+  "bank_code": "MAHG",
+  "bank_name": "Maharashtra Gramin Bank",
+  "node_id": "mgb-risk-node-08",
+  "port": 8008,
+  "data_file": "servers/mgb_node/mgb_applications.csv",
+  "officer_roles": [
+    "OFFICER-789",
+    "MAHG-OFFICER-101",
+    "MAHG-UNDERWRITER-01"
+  ],
+  "branch_pin": "413008",
+  "risk_policy": {
+    "max_risk_pd": 0.25,
+    "min_credit_score": 600,
+    "agri_bonus_pct": 0.05
+  }
+}

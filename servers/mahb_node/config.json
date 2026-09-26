@@ -1,0 +1,18 @@
+{
+  "bank_code": "MAHB",
+  "bank_name": "Bank of Maharashtra",
+  "node_id": "mahb-risk-node-02",
+  "port": 8002,
+  "data_file": "servers/mahb_node/mahb_applications.csv",
+  "officer_roles": [
+    "OFFICER-789",
+    "MAHB-OFFICER-101",
+    "MAHB-UNDERWRITER-01"
+  ],
+  "branch_pin": "413002",
+  "risk_policy": {
+    "max_risk_pd": 0.25,
+    "min_credit_score": 600,
+    "agri_bonus_pct": 0.05
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "generated_at": "2026-08-03T01:03:43.066456+00:00",
+  "scope": "synthetic integration sandbox only",
+  "live_partner_connections": false,
+  "real_personal_data_supported": false,
+  "client_roles": {
+    "sandbox-client": "loan_officer",
+    "sandbox-reviewer": "reviewer",
+    "sandbox-admin": "admin"
+  },
+  "allowed_scopes_by_role": {
+    "loan_officer": [
+      "consent:write",
+      "score:write",
+      "stream:read",
+      "stream:write"
+    ],
+    "reviewer": [
+      "score:write",
+      "stream:read"
+    ],
+    "admin": [
+      "audit:read",
+      "killswitch:manage",
+      "partner:webhook",
+      "retention:run",
+      "stream:read"
+    ]
+  },
+  "signed_partner_webhooks": "SIMULATED_HMAC_ONLY",
+  "audit_ledger": {
+    "valid": true,
+    "entries": 1,
+    "status": "VALID"
+  },
+  "retention": "ADMIN_TRIGGERED_EXPIRED_SYNTHETIC_METADATA_ONLY",
+  "pentest_harness": {
+    "pentest_status": "PASSED",
+    "tests": {
+      "hmac_signature_integrity": "PASS",
+      "rate_limiter_enforcement": "PASS",
+      "audit_ledger_tamper_evidence": "PASS",
+      "rbac_scope_isolation": "PASS"
+    },
+    "timestamp": 1785719023.0664432
+  },
+  "production_blockers": [
+    "No regulated partner, FIU, or lender integration has been approved.",
+    "No production secret manager, key-management system, or external penetration test is configured.",
+    "No real customer data may be sent to this sandbox."
+  ]
+}

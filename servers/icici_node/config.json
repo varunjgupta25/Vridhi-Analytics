@@ -1,0 +1,18 @@
+{
+  "bank_code": "ICIC",
+  "bank_name": "ICICI Rural Bank",
+  "node_id": "icici-risk-node-09",
+  "port": 8009,
+  "data_file": "servers/icici_node/icici_applications.csv",
+  "officer_roles": [
+    "OFFICER-789",
+    "ICIC-OFFICER-101",
+    "ICIC-UNDERWRITER-01"
+  ],
+  "branch_pin": "413009",
+  "risk_policy": {
+    "max_risk_pd": 0.25,
+    "min_credit_score": 600,
+    "agri_bonus_pct": 0.05
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "bank_code": "CNRB",
+  "bank_name": "Canara Bank",
+  "node_id": "canara-risk-node-07",
+  "port": 8007,
+  "data_file": "servers/canara_node/canara_applications.csv",
+  "officer_roles": [
+    "OFFICER-789",
+    "CNRB-OFFICER-101",
+    "CNRB-UNDERWRITER-01"
+  ],
+  "branch_pin": "413007",
+  "risk_policy": {
+    "max_risk_pd": 0.25,
+    "min_credit_score": 600,
+    "agri_bonus_pct": 0.05
+  }
+}

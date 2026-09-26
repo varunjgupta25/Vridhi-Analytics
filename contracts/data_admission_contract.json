@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "product": "Vridhi",
+  "purpose": "Synthetic research, validation, and demonstration only",
+  "default_data_classification": "synthetic",
+  "real_data_default": "DENY_UNTIL_APPROVED",
+  "required_controls_before_real_data_admission": [
+    "purpose-limited consent or another documented lawful basis approved by the data owner",
+    "field-level source contract, provenance, retention, and deletion rules",
+    "documented data controller and access roles",
+    "point-in-time outcome definition and independent delayed-label validation",
+    "privacy, security, fairness, and model-risk approval"
+  ],
+  "datasets": {
+    "nodes.csv": {"classification": "synthetic graph identity and static attributes", "required_columns": ["entity_id", "entity_type", "pincode", "synthetic"]},
+    "edges.csv": {"classification": "synthetic payment-event metadata", "required_columns": ["event_id", "timestamp", "source_id", "target_id", "amount_inr", "transaction_type", "channel", "pincode", "drought_severity", "synthetic"]},
+    "node_month.csv": {"classification": "synthetic point-in-time financial features", "required_columns": ["month", "entity_id", "entity_type", "pincode", "cash_balance", "income_inr", "expense_inr", "net_cash_flow_inr", "income_volatility_3m", "missed_utility_payments", "overdue_installments", "drought_severity", "repayment_ability_proxy", "synthetic"]},
+    "borrower_month_labels.csv": {"classification": "synthetic delayed repayment outcomes", "required_columns": ["month", "farmer_id", "pincode", "synthetic_30dpd", "synthetic_60dpd", "repayment_ability_proxy", "drought_severity", "label_origin"]}
+  }
+}

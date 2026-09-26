@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "scope": "Vridhi synthetic integration sandbox only",
+  "live_partner_connections": false,
+  "real_personal_data_supported": false,
+  "controls": {
+    "roles": ["loan_officer", "reviewer", "admin"],
+    "token_scopes": "role-limited and short-lived",
+    "partner_webhooks": "HMAC-signed synthetic events only",
+    "audit_events": "hash-chained and minimised",
+    "rate_limiting": "single-process sandbox control",
+    "retention": "admin-triggered purge of expired synthetic metadata only"
+  },
+  "not_a_substitute_for": [
+    "regulated lender or FIU security review",
+    "production secret management",
+    "external penetration testing",
+    "real Account Aggregator, UPI, or banking integration approval"
+  ]
+}

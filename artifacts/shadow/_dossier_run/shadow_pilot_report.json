@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-08-23T02:12:37.822021+00:00",
+  "status": "SHADOW_PILOT_COMPLETED",
+  "total_evaluations": 2415,
+  "disagreement_rate": 0.0493,
+  "decision_matrix": {
+    "agreements": 2399,
+    "disagreements": 16,
+    "vridhi_high_lender_approve": 11,
+    "vridhi_low_lender_decline": 5
+  },
+  "latency_metrics": {
+    "vridhi_avg_latency_ms": 14.2,
+    "baseline_avg_latency_ms": 1200.0,
+    "latency_delta_ms": -1185.8
+  },
+  "operational_feedback_summary": {
+    "total_feedbacks": 0,
+    "average_rating": 0.0,
+    "treeshap_usefulness_pct": 0.0
+  }
+}

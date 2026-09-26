@@ -1,0 +1,65 @@
+{
+  "generated_at": "2026-07-27T07:23:36.349542+00:00",
+  "reference_rows": 2415,
+  "current_rows": 2415,
+  "alert_features": [],
+  "overall_status": "STABLE",
+  "automatic_retraining": "DISABLED",
+  "features": {
+    "cash_balance": {
+      "psi": 0.0,
+      "missing_rate_delta": 0.0,
+      "status": "ok"
+    },
+    "income_inr": {
+      "psi": 0.0,
+      "missing_rate_delta": 0.0,
+      "status": "ok"
+    },
+    "expense_inr": {
+      "psi": 0.0,
+      "missing_rate_delta": 0.0,
+      "status": "ok"
+    },
+    "net_cash_flow_inr": {
+      "psi": 0.0,
+      "missing_rate_delta": 0.0,
+      "status": "ok"
+    },
+    "income_volatility_3m": {
+      "psi": 0.0,
+      "missing_rate_delta": 0.0,
+      "status": "ok"
+    },
+    "missed_utility_payments": {
+      "psi": 0.0,
+      "missing_rate_delta": 0.0,
+      "status": "ok"
+    },
+    "overdue_installments": {
+      "psi": 0.0,
+      "missing_rate_delta": 0.0,
+      "status": "ok"
+    },
+    "drought_severity": {
+      "psi": 0.0,
+      "missing_rate_delta": 0.0,
+      "status": "ok"
+    },
+    "repayment_ability_proxy": {
+      "psi": 0.0,
+      "missing_rate_delta": 0.0,
+      "status": "ok"
+    },
+    "buyer_network_stress": {
+      "psi": 0.0,
+      "missing_rate_delta": 0.0,
+      "status": "ok"
+    },
+    "buyer_network_coverage": {
+      "psi": 0.0,
+      "missing_rate_delta": 0.0,
+      "status": "ok"
+    }
+  }
+}

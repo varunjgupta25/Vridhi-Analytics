@@ -1,0 +1,24 @@
+{
+  "version": "1.0.0",
+  "severity_levels": {
+    "P1_CRITICAL": "Data breach, unauthorized scoring, or cryptographic ledger tamper detection.",
+    "P2_HIGH": "API rate-limit exhaust, unexpected drift alert, or auth token forgery attempt.",
+    "P3_MEDIUM": "Degraded scoring response latency or MLflow logging failure.",
+    "P4_LOW": "Non-critical metric reporting error or UI asset load failure."
+  },
+  "emergency_protocols": {
+    "kill_switch": {
+      "endpoint": "/v1/admin/kill-switch",
+      "action": "FREEZE_ALL_SCORING_IMMEDIATELY",
+      "fallback_response": "503 Service Unavailable - System in Emergency Manual Review Only Mode"
+    },
+    "quarantine": {
+      "trigger": "INTEGRITY_FAILURE in TamperEvidentAuditLedger",
+      "action": "Revoke active OAuth tokens and isolate database payload keys."
+    }
+  },
+  "escalation_contacts": {
+    "model_risk_officer": "risk-officer@vridhi.local",
+    "security_lead": "security@vridhi.local"
+  }
+}
