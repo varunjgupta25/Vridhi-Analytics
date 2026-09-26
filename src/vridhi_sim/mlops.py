@@ -88,8 +88,8 @@ def delayed_label_performance(scores: list[dict[str, Any]], learning_rows: list[
     }
 
 
-def model_card(engine: RiskEngine, dataset_name: str) -> dict[str, Any]:
-    return {
+def model_card(engine: RiskEngine, dataset_name: str, training_profile: dict[str, Any] | None = None) -> dict[str, Any]:
+    card: dict[str, Any] = {
         "model_name": "vridhi-synthetic-risk-engine",
         "version": datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ"),
         "intended_use": "Synthetic research and lender manual-review support only.",
@@ -99,7 +99,11 @@ def model_card(engine: RiskEngine, dataset_name: str) -> dict[str, Any]:
         "performance": engine.metrics,
         "training_cutoffs": engine.training_cutoffs,
         "governance": {"human_approval_required": True, "auto_retraining": False, "graph_adjustment_default": engine.config.relational_adjustment_enabled},
+        # training_profile contains measured wall-clock time and peak memory.
+        # If not supplied, the sentinel makes the absence explicit and auditable.
+        "training_profile": training_profile if training_profile is not None else {"not_measured": True},
     }
+    return card
 
 
 def write_json(path: Path, payload: dict[str, Any]) -> Path:

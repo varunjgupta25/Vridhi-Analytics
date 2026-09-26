@@ -274,7 +274,7 @@ class RiskEngine:
             )
         return reasons
 
-    def save(self, output_dir: Path) -> Path:
+    def save(self, output_dir: Path, training_profile: dict[str, Any] | None = None) -> Path:
         if self.base_model is None or self.calibrator is None:
             raise RuntimeError("Train the risk engine before saving it.")
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -292,6 +292,8 @@ class RiskEngine:
                 "warning": "Not a validated GNN and not authorised for autonomous credit decisions.",
             },
             "model_configuration": asdict(self.config),
+            # Embed measured profiling data.  Sentinel makes absence auditable.
+            "training_profile": training_profile if training_profile is not None else {"not_measured": True},
         }
         (output_dir / "risk_engine_metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
         return output_dir
